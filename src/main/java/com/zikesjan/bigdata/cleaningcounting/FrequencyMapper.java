@@ -10,8 +10,6 @@ import org.apache.lucene.analysis.cz.CzechAnalyzer;
 import org.apache.lucene.analysis.cz.CzechStemmer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
-import com.zikesjan.bigdata.TfIdfMain.MyCounters;
-
 public class FrequencyMapper extends Mapper<Text, Text, WordDocumentWritable, Text> {
 
 
@@ -37,7 +35,6 @@ public class FrequencyMapper extends Mapper<Text, Text, WordDocumentWritable, Te
 				}
 			}
 		}
-		if(!keys.isEmpty()) context.getCounter(MyCounters.Documents).increment(1);
 		for(WordDocumentWritable wdw : keys){
 			context.write(wdw, new Text(keys.size()+""));
 		}
