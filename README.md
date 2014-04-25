@@ -4,7 +4,7 @@ tf-idf-Hadoop-MapReduce
 Project from the CTU Big Data course which purpose was to compute tf-idf values for the <b>czech wikipedia</b>
 
 <hr>
-Input to the mapreduce program should be <b>raw documents represented as a line</b>
+Input to the mapreduce program should be <b>raw documents</b> where each of them is <b>represented as a line</b>
 
 text text text tex<br>
 txt text word<br>
