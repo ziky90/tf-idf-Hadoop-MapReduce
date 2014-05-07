@@ -7,13 +7,19 @@ import org.apache.hadoop.io.ByteWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-
+/**
+ * reducer class calculating the lines and writing them out
+ * @author zikesjan
+ *
+ */
 public class RowNumberReducer extends Reducer<ByteWritable, RowNumberWritable, Text, Text>{
 	
 	private Text outputKey = new Text();
 	private long numberOfRows;
 
-	
+	/**
+	 * method that determines line number and writes this number as key and the line as value.
+	 */
 	public void reduce(ByteWritable key, Iterable<RowNumberWritable> values, Context context) throws IOException, InterruptedException {
 		Iterator<RowNumberWritable> itr = values.iterator();
 		if (!itr.hasNext()) {

@@ -8,15 +8,25 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import com.zikesjan.bigdata.TfIdfMain.MyCounters;
 
-
+/**
+ * Reducer class that sums occurencies and writes count data out back to HDFS
+ * @author zikesjan
+ *
+ */
 public class FrequencyReducer extends Reducer<WordDocumentWritable, Text, Text, Text>{
 	
 	private HashSet<String> documents;
 	
+	/**
+	 * setup method to setup HashSet containing all the documents
+	 */
 	public void setup(Context context) throws IOException, InterruptedException {
 		documents = new HashSet<String>();
 	}
 	
+	/**
+	 * reducer method that performs summing and writing
+	 */
 	public void reduce(WordDocumentWritable key, Iterable<Text> values, Context context) throws IOException, 
     InterruptedException{
 		int sum = 0;
@@ -30,6 +40,9 @@ public class FrequencyReducer extends Reducer<WordDocumentWritable, Text, Text, 
         }
 	}
 	
+	/**
+	 * Usage of the counters in cleanup method
+	 */
 	public void cleanup(Context context) throws IOException, InterruptedException {
 		context.getCounter(MyCounters.Documents).increment(documents.size());
 	}

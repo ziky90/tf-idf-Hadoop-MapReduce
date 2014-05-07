@@ -7,6 +7,11 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+/**
+ * Class that contains word and document to be transfered from Mapper to the Reducer
+ * @author zikesjan
+ *
+ */
 public class WordDocumentWritable implements WritableComparable<WordDocumentWritable>{
 	
 	private Text word;

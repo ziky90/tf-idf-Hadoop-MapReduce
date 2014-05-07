@@ -10,6 +10,11 @@ import org.apache.hadoop.io.Writable;
 
 import com.zikesjan.bigdata.TfIdfMain;
 
+/**
+ * writable to make it simpler to carry value, count and partition values from mapper to reducer
+ * @author zikesjan
+ *
+ */
 public class RowNumberWritable implements Writable{
 
 	private Text value;

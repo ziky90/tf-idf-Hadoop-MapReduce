@@ -26,6 +26,11 @@ import com.zikesjan.bigdata.tfidf.TFIDFMapper;
 import com.zikesjan.bigdata.tfidf.TFIDFReducer;
 import com.zikesjan.bigdata.tfidf.WordAndStatWritable;
 
+/**
+ * main class of the tf-idf implementation. It shows how it is possible to use job chaining and counters in Hadoop Map Reduce.
+ * @author zikesjan
+ *
+ */
 public class TfIdfMain {
 
 	public final static byte COUNTER_MARKER = (byte) 'T';
@@ -44,6 +49,7 @@ public class TfIdfMain {
 	public static void main(String[] args) throws IOException,
 			InterruptedException, ClassNotFoundException {
 
+		//input and output path that is passed in arguments
 		Path inputPath = new Path(args[0]);
 		Path outputDir = new Path(args[1]);
 
@@ -72,30 +78,32 @@ public class TfIdfMain {
 		if (hdfs.exists(countedPath))
 			hdfs.delete(countedPath, true);
 
-		// Execute job
+		// Execute the line counting job
 		int code = countLines.waitForCompletion(true) ? 0 : 1;
 
-		// Create word per document job
-		Job wordPerDocument = new Job(conf, "WordPerDocument");
-		wordPerDocument.setJarByClass(FrequencyMapper.class);
-		wordPerDocument.setMapperClass(FrequencyMapper.class);
-		wordPerDocument.setMapOutputKeyClass(WordDocumentWritable.class);
-		wordPerDocument.setMapOutputValueClass(Text.class);
-		wordPerDocument.setReducerClass(FrequencyReducer.class);
-		wordPerDocument.setOutputKeyClass(Text.class);
-		wordPerDocument.setOutputValueClass(Text.class);
-		FileInputFormat.addInputPath(wordPerDocument, countedPath);
-		wordPerDocument.setInputFormatClass(KeyValueTextInputFormat.class);
+		// Create frequency counting job
+		Job frequencyCounting = new Job(conf, "WordPerDocument");
+		frequencyCounting.setJarByClass(FrequencyMapper.class);
+		frequencyCounting.setMapperClass(FrequencyMapper.class);
+		frequencyCounting.setMapOutputKeyClass(WordDocumentWritable.class);
+		frequencyCounting.setMapOutputValueClass(Text.class);
+		frequencyCounting.setReducerClass(FrequencyReducer.class);
+		frequencyCounting.setOutputKeyClass(Text.class);
+		frequencyCounting.setOutputValueClass(Text.class);
+		FileInputFormat.addInputPath(frequencyCounting, countedPath);
+		frequencyCounting.setInputFormatClass(KeyValueTextInputFormat.class);
 		Path finalStatisticsPath = new Path(OUTPUT_PATH_2);
-		FileOutputFormat.setOutputPath(wordPerDocument, finalStatisticsPath);
-		wordPerDocument.setOutputFormatClass(TextOutputFormat.class);
+		FileOutputFormat.setOutputPath(frequencyCounting, finalStatisticsPath);
+		frequencyCounting.setOutputFormatClass(TextOutputFormat.class);
 		
+		// Delete output if exists
 		if (hdfs.exists(finalStatisticsPath))
 			hdfs.delete(finalStatisticsPath, true);
 		
-		// Execute job
-		code = wordPerDocument.waitForCompletion(true) ? 0 : 1;
-		long documents = wordPerDocument.getCounters().findCounter(MyCounters.Documents).getValue();
+		// Execute frequency counting job
+		code = frequencyCounting.waitForCompletion(true) ? 0 : 1;
+		//getting the number of rows counter's value
+		long documents = frequencyCounting.getCounters().findCounter(MyCounters.Documents).getValue();
 		
 		//Create final tfidf computing job
 		Configuration tfidfConf = new Configuration();
@@ -118,6 +126,7 @@ public class TfIdfMain {
 		if (hdfs.exists(reformatedPath))
 			hdfs.delete(reformatedPath, true);
 		
+		//execute the tfidf job
 		code = tfidf.waitForCompletion(true) ? 0 : 1;
 		
 		//Create rotate matrix job
@@ -138,11 +147,17 @@ public class TfIdfMain {
 		if (hdfs.exists(outputDir))
 			hdfs.delete(outputDir, true);
 		
+		//executing the matrix rotation job
 		code = rotateMatrix.waitForCompletion(true) ? 0 : 1;
 		
 		System.exit(code);
 	}
 	
+	/**
+	 * counters definition
+	 * @author zikesjan
+	 *
+	 */
 	public enum MyCounters {
 		Documents
 	}
